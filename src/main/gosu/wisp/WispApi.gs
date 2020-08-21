@@ -1,7 +1,6 @@
 package wisp
 
 uses gw.lang.reflect.json.Json
-uses org.jasypt.exceptions.EncryptionOperationNotPossibleException
 uses spark.Spark
 
 class WispApi {
@@ -9,10 +8,12 @@ class WispApi {
     var _wisps = new HashMap<String, Wisp>()
 
     Spark.post("/create", \ req, res -> {
-      var createWispRequest: Dynamic = Json.fromJson(req.body())
+      var createWispRequest : Dynamic = Json.fromJson(req.body())
       var wisp = new Wisp(:wispId = createWispRequest.id, :wispContents = createWispRequest.contents,
           :wispPassword = createWispRequest.password)
       _wisps.put(wisp.id, wisp)
+      res.header("Access-Control-Allow-Origin", "*");
+      res.header("Access-Control-Allow-Methods", "POST");
       return wisp.encryptedContents
     })
 
@@ -25,6 +26,8 @@ class WispApi {
           res.status(401)
           return "Unauthorized"
         }
+        res.header("Access-Control-Allow-Origin", "*");
+        res.header("Access-Control-Allow-Methods", "POST");
         return decryptedWisp
       } else {
         res.status(404)
